@@ -1,4 +1,5 @@
 import logging
+import random
 from dataclasses import dataclass
 
 from battlebots.core.action import Action
@@ -20,6 +21,9 @@ def tick(state: State, strategies: dict[str, Strategy], config: GameConfig):
     actions: list[Action] = []
     for name, player in state.players.items():
         actions.append(strategies[name].evaluate(name, state))
+
+    # randomly shuffle actions to debias game-ending action states
+    random.shuffle(actions)
 
     for action in actions:
         action.execute(state)
