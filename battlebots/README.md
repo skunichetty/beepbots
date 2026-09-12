@@ -20,7 +20,7 @@ A player can engage in any of the actions below each tick.
 |--------------|--------------------------------------|----------------|
 | Light Attack | Deal 20 pts of HP Damage to opponent | 10 EP          |
 | Heavy Attack | Deal 40 pts of HP Damage to opponent | 20 EP          |
-| Heal         | Heal own HP for 50 pts               | 50 EP          |
+| Heal         | Heal own HP for 50 pts               | 70 EP          |
 | Wait         | Do nothing - forfeit action for tick | 0 EP           |
 
 ## Future Ideas

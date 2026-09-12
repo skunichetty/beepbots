@@ -168,10 +168,10 @@ def build_action(
                 name=action,
                 actor=actor,
                 effects=[
-                    HealEffect(actor=actor, heal_amount=30),
-                    ConsumeEnergyEffect(actor=actor, energy_consumed=20),
+                    HealEffect(actor=actor, heal_amount=50),
+                    ConsumeEnergyEffect(actor=actor, energy_consumed=70),
                 ],
-                constraints=[EnergyConstraint(actor=actor, energy_consumed=50)],
+                constraints=[EnergyConstraint(actor=actor, energy_consumed=70)],
             )
         case _:
             raise ValueError("Unknown action: {action}")
