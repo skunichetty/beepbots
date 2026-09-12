@@ -2,13 +2,7 @@ import logging
 import random
 from abc import ABC, abstractmethod
 
-from battlebots.core.action import (
-    Action,
-    LightDamageAction,
-    HeavyDamageAction,
-    HealAction,
-    WaitAction,
-)
+from battlebots.core.action import Action, build_action, ACTION_TYPES
 from battlebots.core.state import State
 
 logger = logging.getLogger(__name__)
@@ -24,7 +18,9 @@ class DummyStrategy(Strategy):
     def evaluate(self, player_name: str, state: State) -> Action:
         other_players = [name for name in state.players if name != player_name]
         random_player = random.choice(other_players)
-        return LightDamageAction(player_name, random_player)
+        return build_action(
+            action="light_damage", actor=player_name, target=random_player
+        )
 
 
 class CliPlayerStrategy(Strategy):
@@ -36,9 +32,7 @@ class CliPlayerStrategy(Strategy):
         failures = 0
 
         while desired_action is None:
-            desired_action = input(
-                "Select an action [light_damage, heavy_damage, heal, wait]: "
-            )
+            desired_action = input(f"Select an action {list(ACTION_TYPES)}: ")
 
             match desired_action:
                 case "light_damage":
@@ -51,25 +45,29 @@ class CliPlayerStrategy(Strategy):
                             logger.error("%s is not a valid player!", desired_target)
                             desired_target = None
 
-                    return LightDamageAction(player_name, desired_target)
+                    return build_action(
+                        "light_damage", player_name, target=desired_target
+                    )
 
                 case "heavy_damage":
                     desired_target = None
                     while desired_target is None:
                         desired_target = input(
-                            f"Select a player to damage: {other_players}"
+                            f"Select a player to damage {other_players}: "
                         )
                         if desired_target not in other_players:
                             logger.error("%s is not a valid player!", desired_target)
                             desired_target = None
 
-                    return HeavyDamageAction(player_name, desired_target)
+                    return build_action(
+                        "heavy_damage", player_name, target=desired_target
+                    )
 
                 case "heal":
-                    return HealAction(player_name)
+                    return build_action("heal", player_name)
 
                 case "wait":
-                    return WaitAction(player_name)
+                    return build_action("wait", player_name)
 
                 case _:
                     if failures < 10:
