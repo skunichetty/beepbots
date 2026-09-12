@@ -1,6 +1,6 @@
 # Battlebots
 
-A very silly and simple dueling game.
+A simple dueling game between multiple players.
 
 ## Structure
 
