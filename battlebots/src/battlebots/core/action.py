@@ -1,5 +1,5 @@
 import logging
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import override
 
@@ -13,6 +13,7 @@ class Action(ABC):
     actor: str
     target: str | None
 
+    @abstractmethod
     def execute(self, state: State):
         raise NotImplementedError
 
