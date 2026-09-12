@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class GameConfig:
-    health_regeneration: int = 10
-    energy_regeneration: int = 5
+    health_regeneration: int = 5
+    energy_regeneration: int = 10
     game_length: int = 1000
 
 
