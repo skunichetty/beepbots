@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import override, Literal
+from typing import override, Literal, get_args
 
 from battlebots.core.state import State
 
@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 ActionType = Literal["light_damage", "heavy_damage", "heal", "wait"]
+ACTION_TYPES = get_args(ActionType)
 
 
 class Constraint(ABC):

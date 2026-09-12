@@ -2,7 +2,7 @@ import logging
 import random
 from abc import ABC, abstractmethod
 
-from battlebots.core.action import Action, build_action
+from battlebots.core.action import Action, build_action, ACTION_TYPES
 from battlebots.core.state import State
 
 logger = logging.getLogger(__name__)
@@ -32,9 +32,7 @@ class CliPlayerStrategy(Strategy):
         failures = 0
 
         while desired_action is None:
-            desired_action = input(
-                "Select an action [light_damage, heavy_damage, heal, wait]: "
-            )
+            desired_action = input(f"Select an action {list(ACTION_TYPES)}: ")
 
             match desired_action:
                 case "light_damage":
