@@ -1,6 +1,5 @@
 import logging
 import random
-import time
 from collections import Counter
 
 from battlebots.core.action import Action, ACTION_TYPES, build_action
@@ -30,11 +29,8 @@ def main():
     }
 
     def play_trial():
-        start = time.perf_counter_ns()
         summary = play_game(strategies, GameConfig())
-        end = time.perf_counter_ns()
-
-        return summary.winner, end - start
+        return summary.winner, summary.elapsed
 
     runtimes = []
     winners = Counter()
