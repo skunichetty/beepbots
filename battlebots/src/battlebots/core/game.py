@@ -5,8 +5,8 @@ import time
 from dataclasses import dataclass
 
 from battlebots.core.action import Action, ActionType
+from battlebots.core.policy import Policy
 from battlebots.core.state import State, PlayerState
-from battlebots.core.strategy import Strategy
 
 logger = logging.getLogger(__name__)
 
@@ -24,13 +24,11 @@ class TickSummary:
     actions: dict[str, ActionType]
 
 
-def tick(
-    state: State, strategies: dict[str, Strategy], config: GameConfig
-) -> TickSummary:
-    # evaluate strategy
+def tick(state: State, policies: dict[str, Policy], config: GameConfig) -> TickSummary:
+    # evaluate policy
     actions: dict[str, Action] = {}
     for name, player in state.players.items():
-        actions[name] = strategies[name].evaluate(name, state)
+        actions[name] = policies[name].evaluate(name, state)
 
     # randomly shuffle actions to debias game-ending action states
     action_list = list(actions.values())
@@ -70,16 +68,16 @@ class GameSummary:
 
 
 def play_game(
-    strategies: dict[str, Strategy],
+    policies: dict[str, Policy],
     config: GameConfig,
 ) -> GameSummary:
-    state = State({player: PlayerState() for player in strategies.keys()})
+    state = State({player: PlayerState() for player in policies.keys()})
 
     history = []
     start = time.perf_counter_ns()
     while state.tick < config.game_length:
         try:
-            history.append(tick(state, strategies, config))
+            history.append(tick(state, policies, config))
         except KeyboardInterrupt:
             logger.info("\nClosing game")
             end = time.perf_counter_ns()

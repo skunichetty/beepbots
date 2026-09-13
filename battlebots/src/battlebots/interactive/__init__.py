@@ -1,14 +1,14 @@
 import logging
 
 from battlebots.core.game import play_game, GameConfig
-from battlebots.core.strategy import CliPlayerStrategy, DummyStrategy
+from battlebots.core.policy import CliPlayerPolicy, DummyPolicy
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 
 def main():
-    strategies = {"player": CliPlayerStrategy(), "cpu": DummyStrategy()}
+    strategies = {"player": CliPlayerPolicy(), "cpu": DummyPolicy()}
     summary = play_game(strategies, GameConfig())
 
 

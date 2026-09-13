@@ -4,14 +4,14 @@ from collections import Counter
 
 from battlebots.core.action import Action, ACTION_TYPES, build_action
 from battlebots.core.game import play_game, GameConfig
+from battlebots.core.policy import Policy
 from battlebots.core.state import State
-from battlebots.core.strategy import Strategy
 
 logger = logging.getLogger(__name__)
 # logging.basicConfig(level=logging.INFO)
 
 
-class RandomStrategy(Strategy):
+class RandomPolicy(Policy):
     def evaluate(self, player_name: str, state: State) -> Action:
         other_players = [name for name in state.players if name != player_name]
         random_player = random.choice(other_players)
@@ -23,13 +23,13 @@ class RandomStrategy(Strategy):
 
 
 def main():
-    strategies = {
-        "player_one": RandomStrategy(),
-        "player_two": RandomStrategy(),
+    policies = {
+        "player_one": RandomPolicy(),
+        "player_two": RandomPolicy(),
     }
 
     def play_trial():
-        summary = play_game(strategies, GameConfig())
+        summary = play_game(policies, GameConfig())
         return summary.winner, summary.elapsed
 
     runtimes = []

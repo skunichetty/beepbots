@@ -8,13 +8,13 @@ from battlebots.core.state import State
 logger = logging.getLogger(__name__)
 
 
-class Strategy(ABC):
+class Policy(ABC):
     @abstractmethod
     def evaluate(self, player_name: str, state: State) -> Action:
         raise NotImplementedError
 
 
-class DummyStrategy(Strategy):
+class DummyPolicy(Policy):
     def evaluate(self, player_name: str, state: State) -> Action:
         other_players = [name for name in state.players if name != player_name]
         random_player = random.choice(other_players)
@@ -23,7 +23,7 @@ class DummyStrategy(Strategy):
         )
 
 
-class CliPlayerStrategy(Strategy):
+class CliPlayerPolicy(Policy):
     def evaluate(self, player_name: str, state: State) -> Action:
         other_players = [name for name in state.players if name != player_name]
         logger.info("%s", state.report())
