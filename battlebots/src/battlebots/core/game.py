@@ -4,7 +4,9 @@ import random
 import time
 from dataclasses import dataclass
 
-from battlebots.core.action import Action, ActionType
+import numpy as np
+
+from battlebots.core.action import Action, ActionEncoder, build_action
 from battlebots.core.policy import Policy
 from battlebots.core.state import State, PlayerState
 
@@ -21,14 +23,25 @@ class GameConfig:
 @dataclass
 class TickSummary:
     state: State
-    actions: dict[str, ActionType]
+    actions: dict[str, np.ndarray]
 
 
-def tick(state: State, policies: dict[str, Policy], config: GameConfig) -> TickSummary:
+def tick(
+    state: State,
+    policies: dict[str, Policy],
+    config: GameConfig,
+    encoder: ActionEncoder,
+) -> TickSummary:
     # evaluate policy
     actions: dict[str, Action] = {}
+    action_vectors: dict[str, np.ndarray] = {}
+
     for name, player in state.players.items():
-        actions[name] = policies[name].evaluate(name, state)
+        action_vector = policies[name].evaluate(name, state, encoder)
+        index = np.random.choice(np.arange(len(action_vector)), p=action_vector)
+        action, target = encoder.decode(index)
+        actions[name] = build_action(action, name, target=target)
+        action_vectors[name] = action_vector
 
     # randomly shuffle actions to debias game-ending action states
     action_list = list(actions.values())
@@ -52,10 +65,7 @@ def tick(state: State, policies: dict[str, Policy], config: GameConfig) -> TickS
         player.heal(config.health_regeneration)
         player.add_energy(config.energy_regeneration)
 
-    summary = TickSummary(
-        copy.deepcopy(state),
-        {player: action.name for player, action in actions.items()},
-    )
+    summary = TickSummary(copy.deepcopy(state), action_vectors)
     state.tick += 1
     return summary
 
@@ -72,12 +82,13 @@ def play_game(
     config: GameConfig,
 ) -> GameSummary:
     state = State({player: PlayerState() for player in policies.keys()})
+    encoder = ActionEncoder(list(policies.keys()))
 
     history = []
     start = time.perf_counter_ns()
     while state.tick < config.game_length:
         try:
-            history.append(tick(state, policies, config))
+            history.append(tick(state, policies, config, encoder))
         except KeyboardInterrupt:
             logger.info("\nClosing game")
             end = time.perf_counter_ns()

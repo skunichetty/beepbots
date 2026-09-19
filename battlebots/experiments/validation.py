@@ -1,25 +1,26 @@
 import logging
-import random
 from collections import Counter
+from typing import override
 
-from battlebots.core.action import Action, ACTION_TYPES, build_action
+import numpy as np
+
+from battlebots.core.action import ActionEncoder
 from battlebots.core.game import play_game, GameConfig
 from battlebots.core.policy import Policy
 from battlebots.core.state import State
 
 logger = logging.getLogger(__name__)
-# logging.basicConfig(level=logging.INFO)
 
 
 class RandomPolicy(Policy):
-    def evaluate(self, player_name: str, state: State) -> Action:
-        other_players = [name for name in state.players if name != player_name]
-        random_player = random.choice(other_players)
-        random_action = random.choice(ACTION_TYPES)
-
-        return build_action(
-            action=random_action, actor=player_name, target=random_player
-        )
+    @override
+    def evaluate(
+        self, player_name: str, state: State, encoder: ActionEncoder
+    ) -> np.ndarray:
+        random_index = np.random.randint(0, encoder.num_options())
+        probability_vector = np.zeros(shape=(encoder.num_options(),))
+        probability_vector[random_index] = 1
+        return probability_vector
 
 
 def main():

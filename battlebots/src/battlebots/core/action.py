@@ -175,3 +175,31 @@ def build_action(
             )
         case _:
             raise ValueError("Unknown action: {action}")
+
+
+class ActionEncoder:
+    def __init__(self, players: list[str]):
+        options: list[tuple[ActionType, str | None]] = []
+
+        for action_type in ACTION_TYPES:
+            if "damage" in action_type:
+                for player in players:
+                    options.append((action_type, player))
+            else:
+                options.append((action_type, None))
+
+        self.forward_mapping: dict[tuple[ActionType, str | None], int] = {
+            option: index for index, option in enumerate(options)
+        }
+        self.backward_mapping: dict[int, tuple[ActionType, str | None]] = {
+            index: option for index, option in enumerate(options)
+        }
+
+    def num_options(self) -> int:
+        return len(self.forward_mapping)
+
+    def encode(self, action_type: ActionType, target: str | None) -> int:
+        return self.forward_mapping[(action_type, target)]
+
+    def decode(self, value: int) -> tuple[ActionType, str | None]:
+        return self.backward_mapping[value]
