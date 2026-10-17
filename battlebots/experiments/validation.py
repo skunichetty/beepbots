@@ -13,21 +13,18 @@ logger = logging.getLogger(__name__)
 
 
 class RandomPolicy(Policy):
+
     @override
     def evaluate(
         self, player_name: str, state: State, encoder: ActionEncoder
     ) -> np.ndarray:
-        random_index = np.random.randint(0, encoder.num_options())
-        probability_vector = np.zeros(shape=(encoder.num_options(),))
-        probability_vector[random_index] = 1
-        return probability_vector
+        action_vector = np.ones(shape=(encoder.num_options(),))
+        action_vector /= action_vector.sum()
+        return action_vector
 
 
 def main():
-    policies = {
-        "player_one": RandomPolicy(),
-        "player_two": RandomPolicy(),
-    }
+    policies = {"player_one": RandomPolicy(), "player_two": RandomPolicy()}
 
     def play_trial():
         summary = play_game(policies, GameConfig())
