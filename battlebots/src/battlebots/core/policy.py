@@ -2,29 +2,49 @@ import logging
 import random
 from abc import ABC, abstractmethod
 
-from battlebots.core.action import Action, build_action, ACTION_TYPES
+import numpy as np
+
+from battlebots.core.action import (
+    ACTION_TYPES,
+    ActionEncoder,
+    ActionType,
+)
 from battlebots.core.state import State
 
 logger = logging.getLogger(__name__)
 
 
-class Strategy(ABC):
+class Policy(ABC):
     @abstractmethod
-    def evaluate(self, player_name: str, state: State) -> Action:
+    def evaluate(
+        self, player_name: str, state: State, encoder: ActionEncoder
+    ) -> np.ndarray:
         raise NotImplementedError
 
 
-class DummyStrategy(Strategy):
-    def evaluate(self, player_name: str, state: State) -> Action:
+def _build_one_hot(
+    action_type: ActionType, encoder: ActionEncoder, target: str | None
+) -> np.ndarray:
+    index = encoder.encode(action_type, target)
+    probability_vector = np.zeros(shape=(encoder.num_options(),))
+    probability_vector[index] = 1
+
+    return probability_vector
+
+
+class DummyPolicy(Policy):
+    def evaluate(
+        self, player_name: str, state: State, encoder: ActionEncoder
+    ) -> np.ndarray:
         other_players = [name for name in state.players if name != player_name]
         random_player = random.choice(other_players)
-        return build_action(
-            action="light_damage", actor=player_name, target=random_player
-        )
+        return _build_one_hot("light_damage", encoder, random_player)
 
 
-class CliPlayerStrategy(Strategy):
-    def evaluate(self, player_name: str, state: State) -> Action:
+class CliPlayerPolicy(Policy):
+    def evaluate(
+        self, player_name: str, state: State, encoder: ActionEncoder
+    ) -> np.ndarray:
         other_players = [name for name in state.players if name != player_name]
         logger.info("%s", state.report())
 
@@ -45,9 +65,7 @@ class CliPlayerStrategy(Strategy):
                             logger.error("%s is not a valid player!", desired_target)
                             desired_target = None
 
-                    return build_action(
-                        "light_damage", player_name, target=desired_target
-                    )
+                    return _build_one_hot("light_damage", encoder, desired_target)
 
                 case "heavy_damage":
                     desired_target = None
@@ -59,15 +77,13 @@ class CliPlayerStrategy(Strategy):
                             logger.error("%s is not a valid player!", desired_target)
                             desired_target = None
 
-                    return build_action(
-                        "heavy_damage", player_name, target=desired_target
-                    )
+                    return _build_one_hot("heavy_damage", encoder, desired_target)
 
                 case "heal":
-                    return build_action("heal", player_name)
+                    return _build_one_hot("heal", encoder, None)
 
                 case "wait":
-                    return build_action("wait", player_name)
+                    return _build_one_hot("wait", encoder, None)
 
                 case _:
                     if failures < 10:
